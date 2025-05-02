@@ -1,0 +1,94 @@
+{
+    "name": "test",
+    "homePage": "",
+    "repos": {
+        "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {
+                    "atlas/call": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "atlas/pmd": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "atlas/recal": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "atlas/splitmerge": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "bcftools/index": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules",
+                            "vcf_impute_glimpse"
+                        ]
+                    },
+                    "bcftools/merge": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "bcftools/reheader": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "glimpse/chunk": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "vcf_impute_glimpse"
+                        ]
+                    },
+                    "glimpse/ligate": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "vcf_impute_glimpse"
+                        ]
+                    },
+                    "glimpse/phase": {
+                        "branch": "master",
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": [
+                            "vcf_impute_glimpse"
+                        ]
+                    }
+                }
+            },
+            "subworkflows": {
+                "nf-core": {
+                    "vcf_impute_glimpse": {
+                        "branch": "master",
+                        "git_sha": "d4d6fbc733749b30a226acb32c65c9c03c35158e",
+                        "installed_by": [
+                            "subworkflows"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
