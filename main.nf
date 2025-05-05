@@ -52,6 +52,7 @@ include { ASSIGN2RUN } from './modules/local/assign2run/main'
 include { SETRG } from './modules/local/setRG/main'
 include { ATLAS_QUALITYTRANSFORMATION } from './modules/local/atlas/qualityTransformation/main'
 include { SAMTOOLS_SPLITBAM } from './modules/local/samtools/splitbam/main'
+include { SAMTOOLS_MERGE } from './modules/local/samtools/merge/main'
 include { DEF_NEWNAMES } from './modules/local/def_newnames/main'
 include { DEF_NEWNAMES as DEF_NEWNAMES_HC} from './modules/local/def_newnames/main'
 include { BCFTOOLS_MAF_GP } from './modules/local/bcftools/maf_gp/main'
@@ -60,6 +61,7 @@ include { BCFTOOLS_INTERSECTBED as BCFTOOLS_INTERSECTBED_HIGHCOV} from './module
 include { BCFTOOLS_FILTER_QUAL_DP } from './modules/local/bcftools/filter_qual_dp/main'
 include { BCFTOOLS_CALL } from './modules/local/bcftools/call/main'
 include { BCFTOOLS_CONCAT } from './modules/local/bcftools/concat/main'
+include { BCFTOOLS_GET_1240K } from './modules/local/bcftools/get_1240k/main'
 
 
 //
@@ -89,8 +91,18 @@ workflow {
         }
         .groupTuple(by: 0) // Group by sample_id
 
-SETRG(ch_samples)
-ch_rg_output = ch_samples
+// Here add the merge of bams when imput is not merged
+
+if (params.merge_bams == true) {
+    SAMTOOLS_MERGE(ch_samples)
+    ch_merged_bams = SAMTOOLS_MERGE.out.merged_bam
+}
+else {
+    ch_merged_bams = ch_samples
+}
+
+SETRG(ch_merged_bams)
+ch_rg_output = ch_merged_bams
 ch_rg_txt = SETRG.out.rg_txt
 
 // Split bam in chromosomes
@@ -237,18 +249,7 @@ ch_phase_input = ch_merged_vcf
 //Run GLIMPSE subworkflow 
 GLIMPSE(ch_phase_input)
 
-//Rename .split
-// DEF_NEWNAMES(GLIMPSE.out.annotated_vcf)
-
-// ch_reheader_input = GLIMPSE.out.annotated_vcf
-//     .map { meta, vcf, index, chr ->
-//         return [meta, vcf, chr]
-//     }.combine(DEF_NEWNAMES.out.samples, by: [0,2])
-//     .multiMap{meta, chr, vcf, samples ->
-//     vcf: [meta, vcf, [], samples, chr]
-//     fasta: [[], []]}
-
-// BCFTOOLS_REHEADER(ch_reheader_input)
+if (params.post_imputation_filters == true) {
 
 // Run FILTER MAF and GP by sample
 ch_max_raf = Channel.from(params.max_raf)
@@ -297,7 +298,34 @@ ch_intersect_input = BCFTOOLS_MAF_GP.out.vcf_maf_gp
 
 BCFTOOLS_INTERSECTBED(ch_intersect_input)
 
+}
+
 // ? 1240k 
+// Reuse intersectbed module or create an specific one that names the output:
+    // ind.ch${CHROM}.vcf.gz
+    // input from glimpse output directly 
+
+if (params.get_1240k == true ) {
+    ch_1240k_csv = Channel.fromPath("${params.csv_1240k}/*.csv")
+    .map { file_path -> 
+            def match = file_path.name =~ /(\d+)\.csv/
+            def chr = match ? match[0][1].toInteger() : null  // Extract chromosome number if present
+            tuple(chr, file_path)  // Create (chr, bed) tuple
+    }
+
+    ch_1240k_input = GLIMPSE.out.annotated_vcf
+    .map { meta, vcf, index, chr ->
+        return [chr, meta, vcf, index]
+    }
+    .combine(ch_1240k_csv, by: 0)
+    .multiMap {chr, meta, vcf, index, csv -> 
+    vcf: [meta, vcf, index, chr]
+    csv: csv
+    }
+
+BCFTOOLS_GET_1240K(ch_1240k_input)
+
+}
 
 // Concat
 
