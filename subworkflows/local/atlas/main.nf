@@ -6,28 +6,19 @@ include { ATLAS_SPLITMERGE } from '../../../modules/nf-core/atlas/splitmerge/mai
 workflow ATLAS {
 
     take:
-    bam // [meta, bam, bai, rg, chr]
-    fasta
-    fai
+    bam_file // [meta, bam, bai, rg, chr]
+    fasta_file
+    fai_file
 
     main:
     ch_versions       = Channel.empty()
 
-    ch_bam = bam
-    // ch_rg = rg_txt
-    ch_fasta = fasta
-    ch_fai = fai
+    ch_bam = bam_file
+    ch_fasta = fasta_file
+    ch_fai = fai_file
 
     // Run ATLAS PMD
     ch_input_pmd = ch_bam
-    //.combine(ch_rg, by:0).distinct()
-    // .combine(ch_fasta)
-    // .combine(ch_fai)
-    // .multiMap{ meta, bam, bai, rg, fasta, fai ->
-    //     bam: [meta, bam, bai, rg]
-    //     fasta: fasta
-    //     fai: fai
-    // }
 
     ch_pmd_output = ATLAS_PMD(ch_bam, ch_fasta, ch_fai)
     ch_versions = ch_versions.mix(ATLAS_PMD.out.versions)
@@ -60,7 +51,7 @@ workflow ATLAS {
         sites: []
     }
 
-    ATLAS_RECAL(ch_recal_input_chr)
+    ATLAS_RECAL(ch_recal_input_chr.input, ch_recal_input_chr.regions, ch_recal_input_chr.alleles, ch_recal_input_chr.sites)
     ch_versions = ch_versions.mix(ATLAS_RECAL.out.versions)
 
 
@@ -85,7 +76,7 @@ workflow ATLAS {
         method: method
     }
 
-    ch_calls = ATLAS_CALL(ch_atlas_call_input) 
+    ch_calls = ATLAS_CALL(ch_atlas_call_input.bam, ch_atlas_call_input.fasta, ch_atlas_call_input.fai, ch_atlas_call_input.known_alleles, ch_atlas_call_input.method) 
     ch_versions = ch_versions.mix(ATLAS_CALL.out.versions)
 
     emit:
