@@ -38,6 +38,7 @@ process ATLAS_CALL {
         $pmd_file \\
         $known_alleles_file \\
         method=${method} \\
+        printAll \\
         $args
 
 
