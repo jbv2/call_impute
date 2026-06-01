@@ -16,7 +16,6 @@ process BCFTOOLS_FILTER_QUAL_DP {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
-    def chr = task.ext.chr ?: "${meta.chr}"
 
     """
     # calculate genome depth of coverage
