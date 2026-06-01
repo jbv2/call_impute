@@ -7,7 +7,7 @@ process BCFTOOLS_GET_1240K {
     path(regions)
 
     output:
-    tuple val(meta), path("*.ch*.vcf.gz"), path("*.ch*.vcf.gz.tbi"), val(chr), emit: vcf_1240k
+    tuple val(meta), path("*.ch*.vcf.gz"), path("*.ch*.vcf.gz.csi"), val(chr), emit: vcf_1240k
     path "versions.yml"                       , emit: versions
 
     when:
@@ -28,7 +28,7 @@ process BCFTOOLS_GET_1240K {
         -v snps \\
         --threads $task.cpus \\
         -Oz \\
-        -W=tbi \\
+        -W=csi \\
         -o "\${sample}"".ch${chr}.vcf.gz" \\
         $vcf 
     done
