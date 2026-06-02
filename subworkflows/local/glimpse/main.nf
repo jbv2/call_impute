@@ -5,6 +5,7 @@ include { GLIMPSE_PHASE } from '../../../modules/nf-core/glimpse/phase/main'
 include { GLIMPSE_LIGATE } from '../../../modules/nf-core/glimpse/ligate/main'
 include { GLIMPSE_SAMPLE } from '../../../modules/local/glimpse/sample/main'
 include { BCFTOOLS_ANNOTATE } from '../../../modules/local/bcftools/annotate/main'
+include { BCFTOOLS_STATS_1240K as BCFTOOLS_STATS } from '../../../modules/local/bcftools/stats_1240k/main'
 
 
 workflow GLIMPSE {
@@ -75,6 +76,19 @@ ch_annotate_input = GLIMPSE_SAMPLE.out.sample_vcf
 
 BCFTOOLS_ANNOTATE(ch_annotate_input)
 ch_versions = ch_versions.mix( BCFTOOLS_ANNOTATE.out.versions )
+
+// Add here stats fot WG vcfs
+// Collect ALL vcfs and indexes across all samples into single lists
+ch_all_vcfs = BCFTOOLS_ANNOTATE.out.vcf_annotated
+    .map { meta, vcf, index, chr -> [vcf, index] }
+    .collect()
+    .map { files ->
+        def vcfs  = files.findAll { it.toString().endsWith('.vcf.gz') }
+        def index = files.findAll { it.toString().endsWith('.csi') }
+        [vcfs, index]
+    }
+
+BCFTOOLS_STATS(ch_all_vcfs)
 
 emit:
 annotated_vcf = BCFTOOLS_ANNOTATE.out.vcf_annotated
