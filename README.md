@@ -2,6 +2,11 @@
 
 Nextflow pipeline (DSL2) that runs ATLAS to infer genotype likelihoods and the run GLIMPSE to impute ancient genomes. 
 
+This is based on scripts and input from:
+- Selina Carlhoff
+- Guido Alberto Gnecchi Ruscone
+- Luca Traverso
+
 ---
 
 ### Workflow overview
@@ -184,7 +189,7 @@ For more information about the VCF format, please go to the next link: [Variant 
       20      60828   rs187713677     T       G       .       PASS    AN=5008;AF=0.00119808;AC=6      GT      0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0  >
       20      61098   rs6078030       C       T       .       PASS    AN=5008;AF=0.287141;AC=1438     GT      0|0     0|0     0|0     0|0     0|1     0|0     1|0     0|0     0|0     0|0     0|0     0|1     0|0     0|1     0|0     0|0     0|0     1|0     0|0     1|0  >
       ```
-8. A `GLIMPSE` map directory that contains:
+8. A `GLIMPSE` genetic map directory that contains:
   * A `.gmap.gz` per chromosome from the version of the genome you are using. 
     Example line(s):
     ```bash
