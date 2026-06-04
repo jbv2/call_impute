@@ -2,11 +2,6 @@
 
 Nextflow pipeline (DSL2) that runs ATLAS to infer genotype likelihoods and the run GLIMPSE to impute ancient genomes. 
 
-This is based on scripts and input from:
-- Selina Carlhoff
-- Guido Alberto Gnecchi Ruscone
-- Luca Traverso
-
 ---
 
 ### Workflow overview
@@ -267,6 +262,13 @@ Under the hood `call_impute` uses some coding tools, please include the followin
 * Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature biotechnology, 35(4), 316-319.
 
 ---
+
+### Acknowledgments
+
+This is based on scripts and input from:
+- Selina Carlhoff
+- Guido Alberto Gnecchi Ruscone
+- Luca Traverso
 
 ### Contact
 If you have questions, requests, or bugs to report, please email <judith.vballesteros@gmail.com> 
