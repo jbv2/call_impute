@@ -146,11 +146,11 @@ profiles {
 3. A `.bed` file for atlas to run recal. 
     Example line(s):
     ```bash
-  20      5556502 5556504
-  20      5556505 5556507
-  20      5556508 5556510
-  20      5556512 5556513
-  ```
+    20      5556502 5556504
+    20      5556505 5556507
+    20      5556508 5556510
+    20      5556512 5556513
+    ```
 4. An `alleles` file for Atlas to infer genotypes likelihoods. 
     Example line(s):
     ```bash
