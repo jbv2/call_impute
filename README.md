@@ -260,6 +260,7 @@ Under the hood `call_impute` uses some coding tools, please include the followin
 * Narasimhan, V., Danecek, P., Scally, A., Xue, Y., Tyler-Smith, C., & Durbin, R. (2016). BCFtools/RoH: a hidden Markov model approach for detecting autozygosity from next-generation sequencing data. Bioinformatics, 32(11), 1749-1751.
 * Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., ... & 1000 Genome Project Data Processing Subgroup. (2009). The sequence alignment/map format and SAMtools. bioinformatics, 25(16), 2078-2079.
 * Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature biotechnology, 35(4), 316-319.
+* Ewels, P. A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., ... & Nahnsen, S. (2020). The nf-core framework for community-curated bioinformatics pipelines. Nature biotechnology, 38(3), 276-278.
 
 ---
 
@@ -270,7 +271,7 @@ This is based on scripts and input from:
 - Selina Carlhoff
 - Luca Traverso
 
-This pipeline also takes nf-core modules (although I changed some things in some for necessity). Thanks to those authors as well:
+This pipeline also takes nf-core modules (although I changed some things in some for necessity, reason why this is not an nf-core pipeline at the end). Thanks to those authors as well:
   - "@maxibor"
   - "@merszym"
   - "@jfy133"
