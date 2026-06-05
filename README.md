@@ -266,9 +266,24 @@ Under the hood `call_impute` uses some coding tools, please include the followin
 ### Acknowledgments
 
 This is based on scripts and input from:
-- Selina Carlhoff
 - Guido Alberto Gnecchi Ruscone
+- Selina Carlhoff
 - Luca Traverso
+
+This pipeline also takes nf-core modules (although I changed some things in some for necessity). Thanks to those authors as well:
+  - "@maxibor"
+  - "@merszym"
+  - "@jfy133"
+  - "@ltcrod"
+  - "@joseespinosa"
+  - "@drpatelh"
+  - "@nvnieuwk"
+  - "@ramprasadn"
+  - "@bjohnnyd"
+  - "@jemten"
+  - "@ramprasadn"
+  - "@louislenezet"
+
 
 ### Contact
 If you have questions, requests, or bugs to report, please email <judith.vballesteros@gmail.com> 
