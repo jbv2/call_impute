@@ -5,7 +5,7 @@ include { GLIMPSE_PHASE } from '../../../modules/nf-core/glimpse/phase/main'
 include { GLIMPSE_LIGATE } from '../../../modules/nf-core/glimpse/ligate/main'
 include { GLIMPSE_SAMPLE } from '../../../modules/local/glimpse/sample/main'
 include { BCFTOOLS_ANNOTATE } from '../../../modules/local/bcftools/annotate/main'
-include { BCFTOOLS_STATS_1240K as BCFTOOLS_STATS } from '../../../modules/local/bcftools/stats_1240k/main'
+include { BCFTOOLS_STATS_WG } from '../../../modules/local/bcftools/stats_wg/main'
 
 
 workflow GLIMPSE {
@@ -88,7 +88,7 @@ ch_all_vcfs = BCFTOOLS_ANNOTATE.out.vcf_annotated
         [vcfs, index]
     }
 
-BCFTOOLS_STATS(ch_all_vcfs)
+BCFTOOLS_STATS_WG(ch_all_vcfs)
 
 emit:
 annotated_vcf = BCFTOOLS_ANNOTATE.out.vcf_annotated
