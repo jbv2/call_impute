@@ -47,7 +47,7 @@ process BCFTOOLS_CALL {
         view \\
         -Oz \\
         -W=tbi \\
-        -o ${prefix}.${chr}.missing.vcf.gz \\
+        -o ${prefix}.${chr}.missing.vcf.gz 
         
 
     cat <<-END_VERSIONS > versions.yml
