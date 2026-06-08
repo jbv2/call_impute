@@ -26,7 +26,7 @@ nextflow.enable.dsl = 2
 // SUBWORKFLOW: Installed directly from nf-core/subworkflows
 //
 
-include { VCF_IMPUTE_GLIMPSE } from './subworkflows/nf-core/vcf_impute_glimpse/main'
+//include { VCF_IMPUTE_GLIMPSE } from './subworkflows/nf-core/vcf_impute_glimpse/main'
 
 //
 // MODULE: Installed directly from nf-core/modules
