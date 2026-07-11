@@ -112,14 +112,21 @@ SETRG(ch_merged_bams)
 ch_rg_output = ch_merged_bams
 ch_rg_txt = SETRG.out.rg_txt
 
-// Split bam in chromosomes
-ch_i = Channel.fromList(params.chromosomes)
-//ch_i = Channel.of(20)
+// ── Chromosome prefix based on genome build ──────────────────────────────────
+chr_prefix = params.genome == "hg19" ? "chr" : ""
+
+// ── Chromosome channel with correct prefix ───────────────────────────────────
+ch_i = Channel
+  .fromList(params.chromosomes)
+  .map { chr -> "${chr_prefix}${chr}" }
+
+// ── Combine with BAM and split ───────────────────────────────────────────────
 ch_input_split = ch_rg_output
-    .combine(ch_i)
-    .map { meta, bam, bai, chr ->
-        return [meta, bam, bai, chr]
-    }
+  .combine(ch_i)
+  .map { meta, bam, bai, chr ->
+    return [meta, bam, bai, chr]
+  }
+
 ch_splittedbam = SAMTOOLS_SPLITBAM(ch_input_split).split_bam
 
 ch_fasta = Channel.from(params.fasta)
@@ -280,16 +287,18 @@ if (params.get_1240k == true ) {
 BCFTOOLS_GET_1240K(ch_1240k_input.vcf, ch_1240k_input.csv)
 
 // Collect ALL vcfs and indexes across all samples into single lists
-ch_all_vcfs = BCFTOOLS_GET_1240K.out.vcf_1240k
-    .map { meta, vcf, index, chr -> [vcf, index] }
+ch_vcfs_only = BCFTOOLS_GET_1240K.out.vcf_1240k
+    .map { meta, vcf, index, chr -> vcf }
     .collect()
-    .map { files ->
-        def vcfs  = files.findAll { it.toString().endsWith('.vcf.gz') }
-        def index = files.findAll { it.toString().endsWith('.csi') }
-        [vcfs, index]
-    }
+    .map { it.flatten() }
 
-BCFTOOLS_STATS_1240K(ch_all_vcfs)
+ch_index_only = BCFTOOLS_GET_1240K.out.vcf_1240k
+    .map { meta, vcf, index, chr -> index }
+    .collect()
+    .map { it.flatten() }
+
+// Call with TWO arguments, not a tuple channel
+BCFTOOLS_STATS_1240K(ch_vcfs_only, ch_index_only)
 
 }
 

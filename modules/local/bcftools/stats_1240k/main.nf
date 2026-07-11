@@ -3,7 +3,8 @@ process BCFTOOLS_STATS_1240K {
     label 'process_low'
 
     input:
-    tuple path(vcfs), path(index)
+    path(vcfs)      // ← NOT tuple, just path
+    path(indexes)   // ← separate input
 
     output:
     path("imputation_qc.tsv"), emit: tsv
@@ -26,9 +27,8 @@ process BCFTOOLS_STATS_1240K {
                     | bcftools view \\
                         --include 'FORMAT/GP[*] >= 0.99' \\
                         --no-header \\
-                    | wc -l)
-
-        echo -e "\${sample}\\t\${count}" >> imputation_qc.tsv
+                    | wc -l) \\
+                    && echo -e "\${sample}\\t\${count}" >> imputation_qc.tsv
 
     done
 

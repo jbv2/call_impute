@@ -17,41 +17,48 @@ workflow ATLAS {
     ch_fasta = fasta_file
     ch_fai = fai_file
 
+    // Normalize the selected chromosome (supports hg19 and b37)
+    def recalChr = params.chromosomes[0].toString()
+
     // Run ATLAS PMD
     ch_input_pmd = ch_bam
 
     ch_pmd_output = ATLAS_PMD(ch_bam, ch_fasta, ch_fai)
     ch_versions = ch_versions.mix(ATLAS_PMD.out.versions)
 
-
     // Run RECAL
     ch_recal_input = ch_input_pmd
-    .map{ meta, bam, bai, rg, chr ->
-        [meta, chr, bam, bai, rg ]
-    }
-    .combine(ch_pmd_output.empiric, by: [0,1]).distinct()
-    .map {meta, chr, bam, bai, rg, empiric ->
-        [meta, bam, bai, empiric, rg, chr]
-    }
+        .map { meta, bam, bai, rg, chr ->
+            [meta, chr, bam, bai, rg]
+        }
+        .combine(ch_pmd_output.empiric, by: [0,1]).distinct()
+        .map { meta, chr, bam, bai, rg, empiric ->
+            [meta, bam, bai, empiric, rg, chr]
+        }
 
     ch_recal_regions = Channel.from(params.atlas_recal_regions)
-    ch_recal_input_chr = ch_recal_input
-    .filter { meta, bam, bai, empiric, rg, chr ->
-        chr == 20 // Here use chrom 20
-    }
-    .map{
-        meta, bam, bai, empiric, rg, chr ->
-        [meta, bam, bai, empiric, rg]
-    }
-    .combine(ch_recal_regions)
-    .multiMap{ meta, bam, bai, empiric, rg, regions ->
-        input: [meta, bam, bai, empiric, rg]
-        regions: regions
-        alleles: []
-        sites: []
-    }
 
-    ATLAS_RECAL(ch_recal_input_chr.input, ch_recal_input_chr.regions, ch_recal_input_chr.alleles, ch_recal_input_chr.sites)
+    ch_recal_input_chr = ch_recal_input
+        .filter { meta, bam, bai, empiric, rg, chr ->
+            chr.replaceFirst(/^chr/, "") == recalChr
+        }
+        .map { meta, bam, bai, empiric, rg, chr ->
+            [meta, bam, bai, empiric, rg]
+        }
+        .combine(ch_recal_regions)
+        .multiMap { meta, bam, bai, empiric, rg, regions ->
+            input:   [meta, bam, bai, empiric, rg]
+            regions: regions
+            alleles: []
+            sites:   []
+        }
+
+    ATLAS_RECAL(
+        ch_recal_input_chr.input,
+        ch_recal_input_chr.regions,
+        ch_recal_input_chr.alleles,
+        ch_recal_input_chr.sites
+    )
     ch_versions = ch_versions.mix(ATLAS_RECAL.out.versions)
 
 
