@@ -71,9 +71,12 @@ include { GLIMPSE } from './subworkflows/local/glimpse/main'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+def chrKey(c) {
+    return (c.toString() =~ /(\d+)/)[0][0].toInteger()
+}
+
 workflow {
     ch_versions = Channel.empty()
-
     
 // Read the TSV file and extract columns
     ch_samples = Channel
@@ -246,20 +249,21 @@ ch_glimpse_map = Channel.fromPath("${params.glimpse_map}/*.gmap.gz")
 ch_glimpse_chunks = Channel.fromPath("${params.glimpse_chunks}/*.txt")
     .splitCsv(header: ['ID', 'Chr', 'RegionIn', 'RegionOut', 'Size1', 'Size2'], sep: "\t", skip: 0)
     .map { row -> 
-        def chr = row["Chr"].toInteger()  // Extract chromosome number
+        def chr = chrKey(row["Chr"])  // Extract chromosome number
         tuple(chr, row["RegionIn"], row["RegionOut"])  // Create (chr, RegionIn, RegionOut) tuple
     }
     .groupTuple(by: [0,1,2])
 
 ch_phase_input = ch_merged_vcf
-    .map{meta, vcf, csi, chr, samples -> 
-        return [chr, meta, vcf, csi, samples]
+    .map { meta, vcf, csi, chr, samples ->
+        def chr_num = chrKey(chr)
+        return [chr_num, meta, vcf, csi, samples, chr]   // keep original label
     }
     .join(ch_glimpse_ref)
     .join(ch_glimpse_map)
     .combine(ch_glimpse_chunks, by: 0)
-    .map{ chr, meta, vcf, csi, samples, ref, index, map, regionin, regionout ->
-        return [meta, vcf, csi, samples, regionin, regionout, ref, index, map, chr]
+    .map { chr_num, meta, vcf, csi, samples, chr_label, ref, index, map, regionin, regionout ->
+        return [meta, vcf, csi, samples, regionin, regionout, ref, index, map, chr_label]
     }
     
 //Run GLIMPSE subworkflow 
@@ -276,12 +280,13 @@ if (params.get_1240k == true ) {
 
     ch_1240k_input = GLIMPSE.out.annotated_vcf
     .map { meta, vcf, index, chr ->
-        return [chr, meta, vcf, index]
+        def chr_num = chrKey(chr)
+        return [chr_num, meta, vcf, index, chr]   // keep label too
     }
     .combine(ch_1240k_csv, by: 0)
-    .multiMap {chr, meta, vcf, index, csv -> 
-    vcf: [meta, vcf, index, chr]
-    csv: csv
+    .multiMap { chr_num, meta, vcf, index, chr_label, csv ->
+        vcf: [meta, vcf, index, chr_label]
+        csv: csv
     }
 
 BCFTOOLS_GET_1240K(ch_1240k_input.vcf, ch_1240k_input.csv)
