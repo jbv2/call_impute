@@ -118,6 +118,9 @@ ch_rg_txt = SETRG.out.rg_txt
 // ── Chromosome prefix based on genome build ──────────────────────────────────
 chr_prefix = params.genome == "hg19" ? "chr" : ""
 
+// ── Chromosome used for ATLAS recalibration (from params) ───────────────────
+def recal_chr = "${chr_prefix}${params.atlas_recal_chr}"
+
 // ── Chromosome channel with correct prefix ───────────────────────────────────
 ch_i = Channel
   .fromList(params.chromosomes)
@@ -133,20 +136,25 @@ ch_input_split = ch_rg_output
 ch_splittedbam = SAMTOOLS_SPLITBAM(ch_input_split).split_bam
 
 ch_fasta = Channel.from(params.fasta)
-ch_fai = Channel.from(params.fai)
+ch_fai   = Channel.from(params.fai)
 
 ch_atlas_input = ch_splittedbam
-.combine(ch_rg_txt, by:0).distinct()
-.combine(ch_fasta)
-.combine(ch_fai)
-.multiMap { meta, bam, bai, chr, rg_txt, fasta, fai ->
-    bam: [meta, bam, bai, rg_txt, chr]
+  .combine(ch_rg_txt, by:0).distinct()
+  .combine(ch_fasta)
+  .combine(ch_fai)
+  .multiMap { meta, bam, bai, chr, rg_txt, fasta, fai ->
+    bam:   [meta, bam, bai, rg_txt, chr]
     fasta: fasta
-    fai: fai
-}
+    fai:   fai
+  }
 
-//Subworkflow: ATLAS 
-ATLAS(ch_atlas_input.bam, ch_atlas_input.fasta, ch_atlas_input.fai)
+// ── Subworkflow: ATLAS ────────────────────────────────────────────────────────
+ATLAS(
+  ch_atlas_input.bam,
+  ch_atlas_input.fasta,
+  ch_atlas_input.fai,
+  recal_chr          
+)
 
 // BCFTOOLS MERGE: To merge all individual chromosome VCFs
 

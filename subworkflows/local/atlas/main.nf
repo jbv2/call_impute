@@ -6,27 +6,27 @@ include { ATLAS_SPLITMERGE } from '../../../modules/nf-core/atlas/splitmerge/mai
 workflow ATLAS {
 
     take:
-    bam_file // [meta, bam, bai, rg, chr]
+    bam_file      // [meta, bam, bai, rg, chr]
     fasta_file
     fai_file
+    recal_chr     // e.g. "20" or "chr20"
 
     main:
-    ch_versions       = Channel.empty()
+    ch_versions = Channel.empty()
 
-    ch_bam = bam_file
+    ch_bam   = bam_file
     ch_fasta = fasta_file
-    ch_fai = fai_file
+    ch_fai   = fai_file
 
-    // Normalize the selected chromosome (supports hg19 and b37)
-    def recalChr = params.chromosomes[0].toString()
+    def recalChr = recal_chr.toString()
 
-    // Run ATLAS PMD
+    // ── Run ATLAS PMD ─────────────────────────────────────────────────────────
     ch_input_pmd = ch_bam
 
     ch_pmd_output = ATLAS_PMD(ch_bam, ch_fasta, ch_fai)
-    ch_versions = ch_versions.mix(ATLAS_PMD.out.versions)
+    ch_versions   = ch_versions.mix(ATLAS_PMD.out.versions)
 
-    // Run RECAL
+    // ── Prepare RECAL input ──────────────────────────────────────────────────
     ch_recal_input = ch_input_pmd
         .map { meta, bam, bai, rg, chr ->
             [meta, chr, bam, bai, rg]
@@ -38,9 +38,10 @@ workflow ATLAS {
 
     ch_recal_regions = Channel.from(params.atlas_recal_regions)
 
+    // ── Filter to ONLY the designated recal chromosome ───────────────────────
     ch_recal_input_chr = ch_recal_input
         .filter { meta, bam, bai, empiric, rg, chr ->
-            chr.replaceFirst(/^chr/, "") == recalChr
+            chr.toString() == recalChr
         }
         .map { meta, bam, bai, empiric, rg, chr ->
             [meta, bam, bai, empiric, rg]
@@ -57,38 +58,42 @@ workflow ATLAS {
         ch_recal_input_chr.input,
         ch_recal_input_chr.regions,
         ch_recal_input_chr.alleles,
-        ch_recal_input_chr.sites
+        ch_recal_input_chr.sites,
+        recalChr
     )
     ch_versions = ch_versions.mix(ATLAS_RECAL.out.versions)
 
-
-    // RUN ATLAS CALL
+    // ── RUN ATLAS CALL ────────────────────────────────────────────────────────
 
     ch_known_alleles = Channel.from(params.alleles)
-    ch_method = Channel.from(params.method)
+    ch_method         = Channel.from(params.method)
 
     ch_refs = ch_fasta
-    .merge(ch_fai)
-    .merge(ch_known_alleles)
-    .merge(ch_method)
+        .merge(ch_fai)
+        .merge(ch_known_alleles)
+        .merge(ch_method)
 
-    ch_atlas_call_input = ch_recal_input // meta, bam, bai, empiric, rg, chr
-    .combine(ATLAS_RECAL.out.recal_patterns, by: 0)
-    .combine(ch_refs)
-    .multiMap{ meta, bam, bai, empiric, rg, chr, recal, fasta, fai, known_alleles, method ->
-        bam: [meta, bam, bai, empiric, recal, chr]
-        fasta: fasta
-        fai: fai
-        known_alleles: known_alleles
-        method: method
-    }
+    ch_atlas_call_input = ch_recal_input
+        .combine(ATLAS_RECAL.out.recal_patterns, by: 0)
+        .combine(ch_refs)
+        .multiMap { meta, bam, bai, empiric, rg, chr, recal, fasta, fai, known_alleles, method ->
+            bam:           [meta, bam, bai, empiric, recal, chr]
+            fasta:         fasta
+            fai:           fai
+            known_alleles: known_alleles
+            method:        method
+        }
 
-    ch_calls = ATLAS_CALL(ch_atlas_call_input.bam, ch_atlas_call_input.fasta, ch_atlas_call_input.fai, ch_atlas_call_input.known_alleles, ch_atlas_call_input.method) 
+    ch_calls = ATLAS_CALL(
+        ch_atlas_call_input.bam,
+        ch_atlas_call_input.fasta,
+        ch_atlas_call_input.fai,
+        ch_atlas_call_input.known_alleles,
+        ch_atlas_call_input.method
+    )
     ch_versions = ch_versions.mix(ATLAS_CALL.out.versions)
 
     emit:
     vcfs     = ch_calls.vcf
     versions = ch_versions
-
-
 }
