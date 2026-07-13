@@ -20,7 +20,7 @@ process BCFTOOLS_STATS_WG {
     echo -e "sample\\tn_sites_GP_0.99" > imputation_qc.tsv
 
     # Loop over unique sample prefixes, concat all chrs, then count
-    for sample in \$(bcftools query -l *.20.annotated.vcf.gz | tr "\n" " "); do 
+    for sample in \$(bcftools query -l *20.annotated.vcf.gz | tr "\n" " "); do 
 
         count=\$(bcftools concat ${args} \$(ls *.vcf.gz | sort -V) \\
                     | bcftools view \\

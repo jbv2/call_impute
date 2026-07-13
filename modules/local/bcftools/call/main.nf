@@ -36,7 +36,7 @@ process BCFTOOLS_CALL {
         -Oz \\
         -o ${prefix}.tmp.vcf.gz 
 
-    new_name=\$(bcftools query -l ${prefix}.tmp.vcf.gz | awk '{print \$1,\$1}' | sed "s#.[0-9]*.split.bam##2")
+    new_name=\$(bcftools query -l ${prefix}.tmp.vcf.gz | awk '{print \$1,\$1}' | sed "s#.[a-z]*[0-9]*.split.bam##2")
     echo \${new_name} > samples.txt
 
     bcftools \\

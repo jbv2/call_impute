@@ -18,7 +18,7 @@ process DEF_NEWNAMES {
     """
     bcftools query -l $vcf > samples.tmp
 
-    awk '{print \$1,\$1}' samples.tmp | sed "s#.[0-9]*.split##2" > samples.txt
+    awk '{print \$1,\$1}' samples.tmp | sed "s#.[a-z]*[0-9]*.split##2" > samples.txt
     """
 
 
